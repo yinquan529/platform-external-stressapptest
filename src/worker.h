@@ -21,7 +21,7 @@
 #ifndef STRESSAPPTEST_WORKER_H_
 #define STRESSAPPTEST_WORKER_H_
 
-#include <pthread.h>
+#include "pthread_barrier.h"
 
 #include <sys/time.h>
 #include <sys/types.h>

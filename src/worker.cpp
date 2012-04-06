@@ -147,7 +147,7 @@ static void *ThreadSpawnerGeneric(void *ptr) {
 void WorkerStatus::Initialize() {
   sat_assert(0 == pthread_mutex_init(&num_workers_mutex_, NULL));
   sat_assert(0 == pthread_rwlock_init(&status_rwlock_, NULL));
-  sat_assert(0 == pthread_barrier_init(&pause_barrier_, NULL,
+  sat_assert(0 == pthread_barrier_init(&pause_barrier_,
                                        num_workers_ + 1));
 }
 
@@ -220,7 +220,7 @@ void WorkerStatus::RemoveSelf() {
   // Decrement num_workers_ and reinitialize pause_barrier_, which we know isn't
   // in use because (status != PAUSE).
   sat_assert(0 == pthread_barrier_destroy(&pause_barrier_));
-  sat_assert(0 == pthread_barrier_init(&pause_barrier_, NULL, num_workers_));
+  sat_assert(0 == pthread_barrier_init(&pause_barrier_, num_workers_));
   --num_workers_;
   ReleaseNumWorkersLock();
 

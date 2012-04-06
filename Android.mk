@@ -21,6 +21,7 @@ LOCAL_SRC_FILES:= \
 	src/os.cpp \
 	src/os_factory.cpp \
 	src/pattern.cpp \
+	src/pthread_barrier.cpp \
 	src/queue.cpp \
 	src/sat.cpp \
 	src/sat_factory.cpp \
