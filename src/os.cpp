@@ -32,11 +32,15 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
+#ifdef HAVE_SHMEM
 #include <sys/shm.h>
+#endif
 #include <unistd.h>
 
+#ifdef HAVE_SHMEM
 #ifndef SHM_HUGETLB
 #define SHM_HUGETLB      04000  // remove when glibc defines it
+#endif
 #endif
 
 #include <string>
@@ -375,6 +379,7 @@ bool OsLayer::AllocateTestMem(int64 length, uint64 paddr_base) {
     logprintf(0, "Process Error: non zero paddr_base %#llx is not supported,"
               " ignore.\n", paddr_base);
 
+#ifdef HAVE_SHMEM
   // Determine optimal memory allocation path.
   bool prefer_hugepages = false;
   bool prefer_posix_shm = false;
@@ -495,6 +500,9 @@ bool OsLayer::AllocateTestMem(int64 length, uint64 paddr_base) {
     } while (0);
     shm_unlink("/stressapptest");
   }
+#endif
+
+  logprintf(3, "Log: Prefer plain malloc memory allocation.\n");
 
   if (!use_hugepages_ && !use_posix_shm_) {
     // Use memalign to ensure that blocks are aligned enough for disk direct IO.
@@ -511,18 +519,19 @@ bool OsLayer::AllocateTestMem(int64 length, uint64 paddr_base) {
   }
 
   testmem_ = buf;
-  if (buf || dynamic_mapped_shmem_) {
+  if (buf) {
     testmemsize_ = length;
   } else {
     testmemsize_ = 0;
   }
 
-  return (buf != 0) || dynamic_mapped_shmem_;
+  return (buf != 0);
 }
 
 // Free the test memory.
 void OsLayer::FreeTestMem() {
   if (testmem_) {
+#ifdef HAVE_SHMEM
     if (use_hugepages_) {
       shmdt(testmem_);
       shmctl(shmid_, IPC_RMID, NULL);
@@ -534,6 +543,9 @@ void OsLayer::FreeTestMem() {
     } else {
       free(testmem_);
     }
+#else
+    free(testmem_);
+#endif
     testmem_ = 0;
     testmemsize_ = 0;
   }
@@ -543,6 +555,7 @@ void OsLayer::FreeTestMem() {
 // Prepare the target memory. It may requre mapping in, or this may be a noop.
 void *OsLayer::PrepareTestMem(uint64 offset, uint64 length) {
   sat_assert((offset + length) <= testmemsize_);
+#ifdef HAVE_SHMEM
   if (dynamic_mapped_shmem_) {
     // TODO(nsanders): Check if we can support MAP_NONBLOCK,
     // and evaluate performance hit from not using it.
@@ -558,12 +571,14 @@ void *OsLayer::PrepareTestMem(uint64 offset, uint64 length) {
     }
     return mapping;
   }
+#endif
 
   return reinterpret_cast<void*>(reinterpret_cast<char*>(testmem_) + offset);
 }
 
 // Release the test memory resources, if any.
 void OsLayer::ReleaseTestMem(void *addr, uint64 offset, uint64 length) {
+#ifdef HAVE_SHMEM
   if (dynamic_mapped_shmem_) {
     int retval = munmap(addr, length);
     if (retval == -1) {
@@ -574,6 +589,8 @@ void OsLayer::ReleaseTestMem(void *addr, uint64 offset, uint64 length) {
       sat_assert(0);
     }
   }
+#endif
+  logprintf(3, "Log: %s, Nothing to do here.\n", __func__);
 }
 
 // No error polling on unknown systems.
