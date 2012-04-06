@@ -1791,6 +1791,7 @@ bool FileThread::PagePrepare() {
 
   // Init a local buffer if we need it.
   if (!page_io_) {
+#ifdef HAVE_POSIX_MEMALIGN
     int result = posix_memalign(&local_page_, 512, sat_->page_length());
     if (result) {
       logprintf(0, "Process Error: disk thread posix_memalign "
@@ -1799,6 +1800,14 @@ bool FileThread::PagePrepare() {
       status_ = false;
       return false;
     }
+#else
+    local_page_ = memalign(512, sat_->page_length());
+    if (!local_page_) {
+      logprintf(0, "Process Error: disk thread memalign failed.\n");
+      status_ = false;
+      return false;
+    }
+#endif
   }
   return true;
 }
@@ -2358,6 +2367,7 @@ bool NetworkSlaveThread::Work() {
   int64 loops = 0;
   // Init a local buffer for storing data.
   void *local_page = NULL;
+#ifdef HAVE_POSIX_MEMALIGN
   int result = posix_memalign(&local_page, 512, sat_->page_length());
   if (result) {
     logprintf(0, "Process Error: net slave posix_memalign "
@@ -2366,6 +2376,14 @@ bool NetworkSlaveThread::Work() {
     status_ = false;
     return false;
   }
+#else
+  local_page = memalign(512, sat_->page_length());
+  if (!local_page) {
+    logprintf(0, "Process Error: net slave memalign failed.\n");
+    status_ = false;
+    return false;
+  }
+#endif
 
   struct page_entry page;
   page.addr = local_page;
@@ -3105,6 +3123,7 @@ bool DiskThread::Work() {
 
   // Allocate a block buffer aligned to 512 bytes since the kernel requires it
   // when using direst IO.
+#ifdef HAVE_POSIX_MEMALIGN
   int memalign_result = posix_memalign(&block_buffer_, kBufferAlignment,
                               sat_->page_length());
   if (memalign_result) {
@@ -3115,6 +3134,18 @@ bool DiskThread::Work() {
     status_ = false;
     return false;
   }
+#else
+  block_buffer_ = memalign(kBufferAlignment
+                              sat_->page_length());
+  if (!block_buffer_) {
+    CloseDevice(fd);
+    logprintf(0, "Process Error: Unable to allocate memory for buffers "
+                 "for disk %s (thread %d) memalign failed.\n",
+              device_name_.c_str(), thread_num_);
+    status_ = false;
+    return false;
+  }
+#endif
 
   if (io_setup(5, &aio_ctx_)) {
     CloseDevice(fd);

@@ -1271,10 +1271,15 @@ void Sat::InitializeThreads() {
     // Allocate all the nums once so that we get a single chunk
     // of contiguous memory.
     int *num;
+#if HAVE_POSIX_MEMALIGN
     int err_result = posix_memalign(
         reinterpret_cast<void**>(&num),
         kCacheLineSize, sizeof(*num) * num_cpus * cc_cacheline_count_);
     sat_assert(err_result == 0);
+#else
+    num = static_cast<int*>(memalign(kCacheLineSize, sizeof(*num) * num_cpus * cc_cacheline_count_));
+    sat_assert(num != NULL);
+#endif
 
     int cline;
     for (cline = 0; cline < cc_cacheline_count_; cline++) {
