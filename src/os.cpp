@@ -763,12 +763,12 @@ uint32 OsLayer::GetBitField(uint32 val, uint32 n, uint32 len) {
 bool OsLayer::CpuStressWorkload() {
   double float_arr[100];
   double sum = 0;
-  unsigned int seed = 12345;
+  unsigned short seed = 12345;
 
   // Initialize array with random numbers.
   for (int i = 0; i < 100; i++) {
-    float_arr[i] = rand_r(&seed);
-    if (rand_r(&seed) % 2)
+    float_arr[i] = nrand48(&seed);
+    if (nrand48(&seed) % 2)
       float_arr[i] *= -1.0;
   }
 

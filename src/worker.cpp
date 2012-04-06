@@ -2449,7 +2449,7 @@ bool CpuCacheCoherencyThread::Work() {
   uint64 time_start, time_end;
   struct timeval tv;
 
-  unsigned int seed = static_cast<unsigned int>(gettid());
+  unsigned short seed = static_cast<unsigned int>(gettid());
   gettimeofday(&tv, NULL);  // Get the timestamp before increments.
   time_start = tv.tv_sec * 1000000ULL + tv.tv_usec;
 
@@ -2459,7 +2459,7 @@ bool CpuCacheCoherencyThread::Work() {
       // Choose a datastructure in random and increment the appropriate
       // member in that according to the offset (which is the same as the
       // thread number.
-      int r = rand_r(&seed);
+      int r = nrand48(&seed);
       r = cc_cacheline_count_ * (r / (RAND_MAX + 1.0));
       // Increment the member of the randomely selected structure.
       (cc_cacheline_data_[r].num[cc_thread_num_])++;
