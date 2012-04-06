@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H  // Built using autoconf
 #include "stressapptest_config.h"
 using namespace std;
-using namespace __gnu_cxx;
+//using namespace __gnu_cxx;
 
 typedef signed long long   int64;
 typedef signed int         int32;
@@ -166,6 +166,7 @@ inline bool sat_sleep(time_t seconds) {
   return nanosleep(&req, NULL) == 0;
 }
 
+#if 0
 // Get an error code description for use in error messages.
 //
 // Args:
@@ -174,6 +175,7 @@ inline string ErrorString(int error_num) {
   char buf[256];
   return string(strerror_r(error_num, buf, sizeof buf));
 }
+#endif
 
 // Define handy constants here
 static const int kTicksPerSec = 100;
