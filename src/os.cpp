@@ -590,7 +590,6 @@ void OsLayer::ReleaseTestMem(void *addr, uint64 offset, uint64 length) {
     }
   }
 #endif
-  logprintf(3, "Log: %s, Nothing to do here.\n", __func__);
 }
 
 // No error polling on unknown systems.
