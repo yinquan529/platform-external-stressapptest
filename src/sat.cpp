@@ -77,7 +77,7 @@ bool Sat::InitializeLogfile() {
   // Open logfile.
   if (use_logfile_) {
     logfile_ = open(logfilename_,
-                    O_WRONLY | O_CREAT | O_DSYNC,
+                    O_WRONLY | O_CREAT | O_SYNC,
                     S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (logfile_ < 0) {
       printf("Fatal Error: cannot open file %s for logging\n",
