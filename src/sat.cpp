@@ -1173,6 +1173,7 @@ void Sat::InitializeThreads() {
   }
   workers_map_.insert(make_pair(kInvertType, invert_vector));
 
+#ifdef HAVE_LIBAIO_H
   // Disk stress threads.
   WorkerVector *disk_vector = new WorkerVector();
   WorkerVector *random_vector = new WorkerVector();
@@ -1215,6 +1216,7 @@ void Sat::InitializeThreads() {
 
   workers_map_.insert(make_pair(kDiskType, disk_vector));
   workers_map_.insert(make_pair(kRandomDiskType, random_vector));
+#endif
 
   // CPU stress threads.
   WorkerVector *cpu_vector = new WorkerVector();

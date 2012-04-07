@@ -43,8 +43,10 @@
 // For size of block device
 #include <sys/ioctl.h>
 #include <linux/fs.h>
+#ifdef HAVE_LIBAIO_H
 // For asynchronous I/O
 #include <libaio.h>
+#endif
 
 #include <sys/syscall.h>
 
@@ -75,9 +77,11 @@ _syscall3(int, sched_setaffinity, pid_t, pid,
           unsigned int, len, cpu_set_t*, mask)
 #endif
 
+#ifdef HAVE_LIBAIO_H
 // Linux aio syscalls.
 #if !defined(__NR_io_setup)
 #error "No aio headers inculded, please install libaio."
+#endif
 #endif
 
 namespace {
@@ -2518,6 +2522,7 @@ bool CpuCacheCoherencyThread::Work() {
   return true;
 }
 
+#ifdef HAVE_LIBAIO_H
 DiskThread::DiskThread(DiskBlockTable *block_table) {
   read_block_size_ = kSectorSize;   // default 1 sector (512 bytes)
   write_block_size_ = kSectorSize;  // this assumes read and write block size
@@ -3195,6 +3200,7 @@ bool RandomDiskThread::DoWork(int fd) {
   pages_copied_ = blocks_read_;
   return true;
 }
+#endif
 
 MemoryRegionThread::MemoryRegionThread() {
   error_injection_ = false;

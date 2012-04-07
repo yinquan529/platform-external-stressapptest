@@ -26,7 +26,9 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#ifdef HAVE_LIBAIO_H
 #include <libaio.h>
+#endif
 
 #include <queue>
 #include <set>
@@ -651,6 +653,7 @@ class CpuCacheCoherencyThread : public WorkerThread {
   DISALLOW_COPY_AND_ASSIGN(CpuCacheCoherencyThread);
 };
 
+#ifdef HAVE_LIBAIO_H
 // Worker thread to perform disk test.
 class DiskThread : public WorkerThread {
  public:
@@ -767,6 +770,7 @@ class RandomDiskThread : public DiskThread {
  protected:
   DISALLOW_COPY_AND_ASSIGN(RandomDiskThread);
 };
+#endif
 
 // Worker thread to perform checks in a specific memory region.
 class MemoryRegionThread : public WorkerThread {
