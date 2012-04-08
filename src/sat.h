@@ -279,7 +279,9 @@ class Sat {
   void NetStats();
   void CheckStats();
   void InvertStats();
+#ifdef HAVE_LIBAIO_H
   void DiskStats();
+#endif
 
   void QueueStats();
 

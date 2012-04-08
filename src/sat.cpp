@@ -1559,6 +1559,7 @@ void Sat::InvertStats() {
             invert_bandwidth);
 }
 
+#ifdef HAVE_LIBAIO_H
 void Sat::DiskStats() {
   float disk_data = 0.;
   float disk_bandwidth = 0.;
@@ -1583,6 +1584,7 @@ void Sat::DiskStats() {
             disk_data,
             disk_bandwidth);
 }
+#endif
 
 // Process worker thread data for bandwidth information, and error results.
 // You can add more methods here just subclassing SAT.
@@ -1593,7 +1595,9 @@ void Sat::RunAnalysis() {
   NetStats();
   CheckStats();
   InvertStats();
+#ifdef HAVE_LIBAIO_H
   DiskStats();
+#endif
 }
 
 // Get total error count, summing across all threads..
